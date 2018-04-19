@@ -1,4 +1,4 @@
-FROM jellywen/centos7-php7-nginx:v1.0
+FROM jellywen/centos7-php7-nginx:v1.1
 MAINTAINER jellywen <jellywen@koudailc.com>
 
 ADD node-v0.10.36-linux-x64.tar.gz /usr/local/
