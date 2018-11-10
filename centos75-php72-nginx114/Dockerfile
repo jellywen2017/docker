@@ -61,20 +61,6 @@ RUN set -x && \
 #    curl -Lk http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | gunzip | tar x -C /home/nginx-php && \
 #    curl -Lk http://php.net/distributions/php-$PHP_VERSION.tar.gz | gunzip | tar x -C /home/nginx-php && \
 
-#Make install nginx
-    cd /home/nginx-php/nginx-$NGINX_VERSION && \
-    ./configure --prefix=/usr/local/nginx \
-    --user=www --group=www \
-    --error-log-path=/var/log/nginx_error.log \
-    --http-log-path=/var/log/nginx_access.log \
-    --pid-path=/var/run/nginx.pid \
-    --with-pcre \
-    --with-http_ssl_module \
-    --without-mail_pop3_module \
-    --without-mail_imap_module \
-    --with-http_gzip_static_module && \
-    make -j8 && make install && \
-
 #Make install php
     cd /home/nginx-php/php-$PHP_VERSION && \
     ./configure --prefix=/usr/local/php \
@@ -127,6 +113,12 @@ RUN set -x && \
     cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf && \
     cp /usr/local/php/etc/php-fpm.d/www.conf.default /usr/local/php/etc/php-fpm.d/www.conf && \
 
+#for swoole
+    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
+    /usr/local/php/bin/phpize && \
+    ./configure --with-php-config=/usr/local/php/bin/php-config && \
+    make -j8 && make install && \
+
 #Add extension mongodb
 #    mkdir -p /home/extension && cd $_ && \
 #    curl -Lk https://pecl.php.net/get/mongodb-1.2.9.tgz | gunzip | tar x -C /home/extension && \
@@ -146,10 +138,18 @@ RUN set -x && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
     make -j8 && make install && \
 
-#for swoole
-    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
-    /usr/local/php/bin/phpize && \
-    ./configure && \
+#Make install nginx
+    cd /home/nginx-php/nginx-$NGINX_VERSION && \
+    ./configure --prefix=/usr/local/nginx \
+    --user=www --group=www \
+    --error-log-path=/var/log/nginx_error.log \
+    --http-log-path=/var/log/nginx_access.log \
+    --pid-path=/var/run/nginx.pid \
+    --with-pcre \
+    --with-http_ssl_module \
+    --without-mail_pop3_module \
+    --without-mail_imap_module \
+    --with-http_gzip_static_module && \
     make -j8 && make install && \
 
 #Clean OS
@@ -197,7 +197,7 @@ RUN set -x && \
     ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N '' && \
     ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
     ssh-keygen -t dsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
-    /usr/sbin/sshd && \
+    /usr/sbin/sshd 
 
 ENV LC_ALL zh_CN.utf8
 
