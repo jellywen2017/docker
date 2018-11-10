@@ -3,4 +3,4 @@
 docker build -t centos75-php72-nginx114:v1.0 .
 
 #使用
-docker run -itd -p 88:80 --name centos bash
+docker run -itd -p 88:80 --name centos centos75-php72-nginx114:v1.0 bash

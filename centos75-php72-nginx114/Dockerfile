@@ -166,6 +166,7 @@ RUN set -x && \
     find /var/log -type f -delete && \
     rm -rf /home/nginx-php && \
     rm -rf /home/extension && \
+    rm -rf /data/phpext && \
 
 #Change Mod from webdir
     chown -R www:www /data/www && \
@@ -197,21 +198,28 @@ RUN set -x && \
     ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N '' && \
     ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
     ssh-keygen -t dsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
-    /usr/sbin/sshd 
+    /usr/sbin/sshd && \
+    echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config && \
+
+    #php链接
+    rm -rf /usr/bin/php && \
+    ln -s /usr/local/php/bin/php /usr/bin/php 
 
 ENV LC_ALL zh_CN.utf8
+ENV COLUMNS 204
+ENV LINES 50
 
 #Add supervisord conf
 ADD supervisord.conf /etc/
 ADD supervisor.d/ /etc/supervisor.d/
 
 #Create web folder
-VOLUME ["/usr/local/nginx/log", "/usr/local/nginx/conf/ssl", "/usr/local/nginx/conf/vhost", "/usr/local/php/log", "/usr/local/php/etc/php.d", "/data/phpext"]
+VOLUME ["/usr/local/nginx/logs", "/usr/local/nginx/conf/ssl", "/usr/local/nginx/conf/vhost", "/usr/local/php/log", "/usr/local/php/etc/php.d"]
 
 ADD extini/ /usr/local/php/etc/php.d/
 ADD php.ini /usr/local/php/etc/php.ini
 ADD www.conf /usr/local/php/etc/php-fpm.d/www.conf
-ADD extfile/ /data/phpext/
+#ADD extfile/ /data/phpext/
 
 
 #Update nginx config
