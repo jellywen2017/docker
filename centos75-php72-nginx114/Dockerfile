@@ -3,11 +3,15 @@ MAINTAINER jellywen <1307553378@qq.com>
 
 ENV NGINX_VERSION 1.14.1
 ENV PHP_VERSION 7.2.12
-ENV SWOOLE_VERSION 7.2.12
+ENV SWOOLE_VERSION 4.2.7
+ENV MONGODB_VERSION 1.5.3
+ENV REDIS_VERSION 4.1.1
 
 ADD nginx-$NGINX_VERSION.tar.gz /home/nginx-php/
 ADD php-$PHP_VERSION.tar.gz /home/nginx-php/
-ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/swoole/
+ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
+ADD mongodb-$MONGODB_VERSION.tgz /home/extension/
+ADD redis-$REDIS_VERSION.tgz /home/extension/
 
 RUN set -x && \
     yum install -y gcc \
@@ -124,9 +128,9 @@ RUN set -x && \
     cp /usr/local/php/etc/php-fpm.d/www.conf.default /usr/local/php/etc/php-fpm.d/www.conf && \
 
 #Add extension mongodb
-    mkdir -p /home/extension && cd $_ && \
-    curl -Lk https://pecl.php.net/get/mongodb-1.2.9.tgz | gunzip | tar x -C /home/extension && \
-    cd /home/extension/mongodb-1.2.9 && \
+#    mkdir -p /home/extension && cd $_ && \
+#    curl -Lk https://pecl.php.net/get/mongodb-1.2.9.tgz | gunzip | tar x -C /home/extension && \
+    cd /home/extension/mongodb-$MONGODB_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
     make -j8 && make install && \
@@ -136,16 +140,15 @@ RUN set -x && \
     mkdir -p /var/{log/supervisor,run/{sshd,supervisord}} && \
 
 #Add extension redis
-    curl -Lk https://github.com/phpredis/phpredis/archive/3.1.6.tar.gz | gunzip | tar x -C /home/extension && \
-    cd /home/extension/phpredis-3.1.6 && \
+#    curl -Lk https://github.com/phpredis/phpredis/archive/3.1.6.tar.gz | gunzip | tar x -C /home/extension && \
+    cd /home/extension/redis-$REDIS_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
     make -j8 && make install && \
 
 #for swoole
-    yum install -y php-pear && \
-    cd swoole-src-$SWOOLE_VERSION && \
-    phpize && \
+    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
+    /usr/local/php/bin/phpize && \
     ./configure && \
     make -j8 && make install && \
 
@@ -162,7 +165,7 @@ RUN set -x && \
     mkdir -p --mode=0755 /var/cache/{yum,ldconfig} && \
     find /var/log -type f -delete && \
     rm -rf /home/nginx-php && \
-    rm -rf /home/swoole && \
+    rm -rf /home/extension && \
 
 #Change Mod from webdir
     chown -R www:www /data/www && \
