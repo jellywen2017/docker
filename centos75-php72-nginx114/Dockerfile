@@ -7,6 +7,8 @@ ENV SWOOLE_VERSION 4.2.7
 ENV MONGODB_VERSION 1.5.3
 ENV REDIS_VERSION 4.1.1
 
+ADD composer.phar /usr/local/bin/composer
+
 ADD nginx-$NGINX_VERSION.tar.gz /home/nginx-php/
 ADD php-$PHP_VERSION.tar.gz /home/nginx-php/
 ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
@@ -58,8 +60,6 @@ RUN set -x && \
 
 #Download nginx & php
     mkdir -p /home/nginx-php && cd $_ && \
-#    curl -Lk http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | gunzip | tar x -C /home/nginx-php && \
-#    curl -Lk http://php.net/distributions/php-$PHP_VERSION.tar.gz | gunzip | tar x -C /home/nginx-php && \
 
 #Make install php
     cd /home/nginx-php/php-$PHP_VERSION && \
@@ -120,8 +120,6 @@ RUN set -x && \
     make -j8 && make install && \
 
 #Add extension mongodb
-#    mkdir -p /home/extension && cd $_ && \
-#    curl -Lk https://pecl.php.net/get/mongodb-1.2.9.tgz | gunzip | tar x -C /home/extension && \
     cd /home/extension/mongodb-$MONGODB_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
@@ -132,7 +130,6 @@ RUN set -x && \
     mkdir -p /var/{log/supervisor,run/{sshd,supervisord}} && \
 
 #Add extension redis
-#    curl -Lk https://github.com/phpredis/phpredis/archive/3.1.6.tar.gz | gunzip | tar x -C /home/extension && \
     cd /home/extension/redis-$REDIS_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
@@ -203,8 +200,10 @@ RUN set -x && \
 
     #php链接
     rm -rf /usr/bin/php && \
-    ln -s /usr/local/php/bin/php /usr/bin/php 
+    ln -s /usr/local/php/bin/php /usr/bin/php && \
+    su www -c "composer config -g repo.packagist composer https://packagist.phpcomposer.com"
 
+#防止宽度高度不足
 ENV LC_ALL zh_CN.utf8
 ENV COLUMNS 204
 ENV LINES 50
@@ -214,17 +213,19 @@ ADD supervisord.conf /etc/
 ADD supervisor.d/ /etc/supervisor.d/
 
 #Create web folder
-VOLUME ["/usr/local/nginx/logs", "/usr/local/nginx/conf/ssl", "/usr/local/nginx/conf/vhost", "/usr/local/php/log", "/usr/local/php/etc/php.d"]
+VOLUME ["/data/www/simple","/usr/local/nginx/logs", "/usr/local/nginx/conf/ssl", "/usr/local/nginx/conf/vhost", "/usr/local/php/log", "/usr/local/php/etc/php.d"]
 
 ADD extini/ /usr/local/php/etc/php.d/
 ADD php.ini /usr/local/php/etc/php.ini
 ADD www.conf /usr/local/php/etc/php-fpm.d/www.conf
-#ADD extfile/ /data/phpext/
-
 
 #Update nginx config
 ADD nginx.conf /usr/local/nginx/conf/
+ADD simple/nginx-simple-server.conf /usr/local/nginx/conf/vhost/nginx-simple-server.conf
 ADD extfile/logrotate.d/ /etc/logrotate.d/
+
+ADD simple/index.php /data/www/simple/index.php
+ADD simple/index.php /data/www/simple/index.php
 
 #Start
 ADD start.sh /
