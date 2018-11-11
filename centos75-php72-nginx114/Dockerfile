@@ -225,7 +225,7 @@ ADD simple/nginx-simple-server.conf /usr/local/nginx/conf/vhost/nginx-simple-ser
 ADD extfile/logrotate.d/ /etc/logrotate.d/
 
 ADD simple/index.php /data/www/simple/index.php
-ADD simple/index.php /data/www/simple/index.php
+ADD simple/index.html /data/www/simple/index.html
 
 #Start
 ADD start.sh /
