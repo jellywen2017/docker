@@ -1,8 +1,3 @@
-2018/11/11
-1.1 jellywen/centos75-php72-nginx114:v1.1
-添加默认simple nginx配置 www目录
-集成composer
-
-2018/11/10
-最新版 jellywen/centos75-php72-nginx114:v1.0
-集成 swoole
+2018/11/12
+1.1 jellywen/centos75-php7124-nginx114:v1.1
+修复supervisord问题
