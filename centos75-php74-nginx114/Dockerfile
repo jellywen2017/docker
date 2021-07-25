@@ -3,7 +3,7 @@ MAINTAINER jellywen <1307553378@qq.com>
 
 ENV NGINX_VERSION 1.14.1
 ENV PHP_VERSION 7.4.21
-#ENV SWOOLE_VERSION 4.2.7
+ENV SWOOLE_VERSION 4.7.0
 ENV MONGODB_VERSION 1.5.3
 ENV REDIS_VERSION 4.1.1
 
@@ -11,7 +11,7 @@ ADD composer.phar /usr/local/bin/composer
 
 ADD nginx-$NGINX_VERSION.tar.gz /home/nginx-php/
 ADD php-$PHP_VERSION.tar.gz /home/nginx-php/
-#ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
+ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
 ADD mongodb-$MONGODB_VERSION.tgz /home/extension/
 ADD redis-$REDIS_VERSION.tgz /home/extension/
 
@@ -47,6 +47,9 @@ RUN set -x && \
     rsync \
     lrzsz \
     git \
+    zip \
+    unzip \
+    php-zip \
     supervisor \
     python-setuptools \
     logrotate && \
@@ -117,10 +120,10 @@ RUN set -x && \
     cp /usr/local/php/etc/php-fpm.d/www.conf.default /usr/local/php/etc/php-fpm.d/www.conf && \
 
 #for swoole
-#    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
-#    /usr/local/php/bin/phpize && \
-#    ./configure --with-php-config=/usr/local/php/bin/php-config && \
-#    make -j8 && make install && \
+    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
+    /usr/local/php/bin/phpize && \
+    ./configure --with-php-config=/usr/local/php/bin/php-config && \
+    make -j2 && make install && \
 
 #Add extension mongodb
     cd /home/extension/mongodb-$MONGODB_VERSION && \
