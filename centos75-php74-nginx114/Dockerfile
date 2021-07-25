@@ -3,7 +3,7 @@ MAINTAINER jellywen <1307553378@qq.com>
 
 ENV NGINX_VERSION 1.14.1
 ENV PHP_VERSION 7.4.21
-ENV SWOOLE_VERSION 4.2.7
+#ENV SWOOLE_VERSION 4.2.7
 ENV MONGODB_VERSION 1.5.3
 ENV REDIS_VERSION 4.1.1
 
@@ -11,7 +11,7 @@ ADD composer.phar /usr/local/bin/composer
 
 ADD nginx-$NGINX_VERSION.tar.gz /home/nginx-php/
 ADD php-$PHP_VERSION.tar.gz /home/nginx-php/
-ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
+#ADD swoole-src-$SWOOLE_VERSION.tar.gz /home/extension/
 ADD mongodb-$MONGODB_VERSION.tgz /home/extension/
 ADD redis-$REDIS_VERSION.tgz /home/extension/
 
@@ -47,6 +47,7 @@ RUN set -x && \
     rsync \
     lrzsz \
     git \
+    supervisor \
     python-setuptools \
     logrotate && \
 
@@ -107,7 +108,7 @@ RUN set -x && \
     --enable-ipv6 \
     --disable-debug \
     --without-pear && \
-    make && make install && \
+    make -j4 && make install && \
 
 #Install php-fpm
     cd /home/nginx-php/php-$PHP_VERSION && \
@@ -116,26 +117,26 @@ RUN set -x && \
     cp /usr/local/php/etc/php-fpm.d/www.conf.default /usr/local/php/etc/php-fpm.d/www.conf && \
 
 #for swoole
-    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
-    /usr/local/php/bin/phpize && \
-    ./configure --with-php-config=/usr/local/php/bin/php-config && \
-    make -j8 && make install && \
+#    cd /home/extension/swoole-src-$SWOOLE_VERSION && \
+#    /usr/local/php/bin/phpize && \
+#    ./configure --with-php-config=/usr/local/php/bin/php-config && \
+#    make -j8 && make install && \
 
 #Add extension mongodb
     cd /home/extension/mongodb-$MONGODB_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
-    make -j8 && make install && \
+    make -j4 && make install && \
 
 #Install supervisor
-    easy_install supervisor && \
+#    easy_install supervisor && \
     mkdir -p /var/{log/supervisor,run/{sshd,supervisord}} && \
 
 #Add extension redis
     cd /home/extension/redis-$REDIS_VERSION && \
     /usr/local/php/bin/phpize && \
     ./configure --with-php-config=/usr/local/php/bin/php-config && \
-    make -j8 && make install && \
+    make -j4 && make install && \
 
 #Make install nginx
     cd /home/nginx-php/nginx-$NGINX_VERSION && \
@@ -149,7 +150,7 @@ RUN set -x && \
     --without-mail_pop3_module \
     --without-mail_imap_module \
     --with-http_gzip_static_module && \
-    make -j8 && make install && \
+    make -j4 && make install && \
 
 #Clean OS
     yum remove -y gcc \
