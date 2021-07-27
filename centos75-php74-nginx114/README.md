@@ -1,6 +1,6 @@
 ## 使用文档
 # 编译
-docker build -t centos75-php74-nginx114:v1.2 .
+docker build -t centos75-php74-nginx114:v1.3 .
 
 # 推到dockerhub
 - docker login
