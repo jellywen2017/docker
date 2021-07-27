@@ -207,7 +207,7 @@ RUN set -x && \
     #php链接
     rm -rf /usr/bin/php && \
     ln -s /usr/local/php/bin/php /usr/bin/php && \
-    su www -c "composer config -g repo.packagist composer https://packagist.phpcomposer.com"
+    su www -c "composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/"
 
 #防止宽度高度不足
 ENV LC_ALL zh_CN.utf8
